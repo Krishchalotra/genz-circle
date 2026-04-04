@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* ---------------- STAR BACKGROUND ---------------- */
+
+.stars, .stars2, .stars3 {
+  position: absolute;
+  inset: 0;
+  width: 2000px;
+  height: 2000px;
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+.stars {
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, white, transparent),
+    radial-gradient(2px 2px at 40px 70px, white, transparent),
+    radial-gradient(1px 1px at 90px 40px, white, transparent),
+    radial-gradient(1px 1px at 130px 80px, white, transparent);
+  animation: moveStars 100s linear infinite;
+}
+
+.stars2 {
+  background-image:
+    radial-gradient(2px 2px at 50px 100px, white, transparent),
+    radial-gradient(1px 1px at 150px 200px, white, transparent),
+    radial-gradient(2px 2px at 200px 50px, white, transparent);
+  animation: moveStars 150s linear infinite;
+}
+
+.stars3 {
+  background-image:
+    radial-gradient(1px 1px at 100px 150px, white, transparent),
+    radial-gradient(2px 2px at 300px 200px, white, transparent);
+  animation: moveStars 200s linear infinite;
+}
+
+@keyframes moveStars {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+/* Fix Chrome autofill white background */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0.1) inset;
+  -webkit-text-fill-color: white;
+  transition: background-color 5000s ease-in-out 0s;
+}
