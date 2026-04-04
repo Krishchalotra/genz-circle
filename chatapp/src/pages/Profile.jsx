@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import SERVER from "../config";
 
 function Avatar({ name, size = 80 }) {
   const initials = name
@@ -43,7 +44,7 @@ export default function Profile() {
     if (!userId) { navigate("/login"); return; }
 
     axios
-      .get(`http://localhost:5000/api/users/profile/${userId}`)
+      .get(`${SERVER}/api/users/profile/${userId}`)
       .then((res) => setData(res.data))
       .catch(() => setError("Failed to load profile"))
       .finally(() => setLoading(false));

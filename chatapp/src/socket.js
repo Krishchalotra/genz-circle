@@ -1,15 +1,14 @@
 import { io } from "socket.io-client";
+import SERVER from "./config";
 
-const URL = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
-
-const socket = io(URL, {
+const socket = io(SERVER, {
   autoConnect: true,
   reconnection: true,
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
   timeout: 20000,
-  transports: ["websocket", "polling"], // fallback to polling for iOS
+  transports: ["websocket", "polling"],
 });
 
 socket.on("connect", () => console.log("Socket connected:", socket.id));

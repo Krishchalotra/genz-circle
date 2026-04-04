@@ -15,8 +15,9 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",
+  origin: process.env.CLIENT_URL || "https://genz-circle.vercel.app",
   methods: ["GET", "POST", "DELETE"],
+  credentials: true,
 }));
 app.use(express.json({ limit: "4mb" })); // cap payload size
 
@@ -60,8 +61,9 @@ mongoose
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "*",
+    origin: process.env.CLIENT_URL || "https://genz-circle.vercel.app",
     methods: ["GET", "POST"],
+    credentials: true,
   },
   maxHttpBufferSize: 4 * 1024 * 1024, // 4MB max socket message
   pingTimeout: 60000,

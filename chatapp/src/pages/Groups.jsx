@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import sky from "../assets/sky.jpg";
 import { useEffect } from "react";
 import axios from "axios";
+import SERVER from "../config";
 
 export default function Groups() {
 
@@ -23,7 +24,7 @@ async function addGroup() {
   const user = JSON.parse(localStorage.getItem("user")) || {};
 
   try {
-    await axios.post("http://localhost:5000/api/groups/create", {
+    await axios.post(`${SERVER}/api/groups/create`, {
       name: cleaned,
       interest: "General",
       userId: user.id,
@@ -38,7 +39,7 @@ async function addGroup() {
 
 async function fetchGroups() {
   try {
-    const res = await axios.get("http://localhost:5000/api/groups");
+    const res = await axios.get(`${SERVER}/api/groups`);
     setGroups(res.data);
   } catch (err) {
     console.log(err);

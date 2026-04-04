@@ -4,6 +4,7 @@ import sky from "../assets/sky.jpg";
 import { Outlet, useLocation } from "react-router-dom";
 import axios from "axios";
 import socket from "../socket";
+import SERVER from "../config";
 
 export default function MainLayout() {
   const [groups, setGroups] = useState([]);
@@ -15,7 +16,7 @@ export default function MainLayout() {
 
   useEffect(() => {
     let cancelled = false;
-    axios.get("http://localhost:5000/api/groups")
+    axios.get(`${SERVER}/api/groups`)
       .then((res) => { if (!cancelled) setGroups(res.data); })
       .catch(() => {
         if (!cancelled) setGroups([

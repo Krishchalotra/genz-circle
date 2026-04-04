@@ -1,5 +1,7 @@
-import { useNavigate } from "react-router-dom";import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import SERVER from "../config";
 
 export default function Sidebar({ groups, onGroupCreated, unread = {} }) {
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ export default function Sidebar({ groups, onGroupCreated, unread = {} }) {
 
     setCreating(true); setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/groups/create", {
+      const res = await axios.post(`${SERVER}/api/groups/create`, {
         name: newGroupName.trim(),
         interest: selectedInterest,
       });

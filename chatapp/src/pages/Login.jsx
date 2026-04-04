@@ -2,42 +2,39 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import sky from "../assets/sky.jpg";
+import SERVER from "../config";
 
 export default function Login() {
-
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleLogin() {
+    setError("");
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
     try {
       setLoading(true);
-      console.log("Sending login...");
-
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
-
-      console.log("Response data:", res.data);
-
-      // ✅ SAVE USER (IMPORTANT FIX)
+      const res = await axios.post(`${SERVER}/api/auth/login`, { email, password });
       localStorage.setItem("user", JSON.stringify(res.data.user));
-
-      // (optional) token bhi save kar sakta hai
       localStorage.setItem("token", res.data.token);
-
-      // ✅ Redirect to app
       navigate("/app");
-
     } catch (err) {
-      console.log("LOGIN ERROR:", err.response?.data || err.message);
-      alert("Login failed ❌ Check credentials");
+      const msg = err.response?.data?.message;
+      if (!err.response) {
+        setError("Cannot reach server. Check your connection.");
+      } else if (msg === "User not found") {
+        setError("No account found with that email.");
+      } else if (msg === "Invalid password") {
+        setError("Wrong password. Please try again.");
+      } else {
+        setError(msg || "Login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -78,6 +75,12 @@ export default function Login() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        {error && (
+          <p className="text-red-400 text-sm text-center mt-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
 
         <p className="text-center text-sm text-gray-400 mt-6">
           New here?{" "}

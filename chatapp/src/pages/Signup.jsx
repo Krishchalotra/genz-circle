@@ -1,53 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import sky from "../assets/sky.jpg";
+import SERVER from "../config";
 
 export default function Signup() {
-
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: ""
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   }
 
-  
   async function handleSubmit(e) {
-  e.preventDefault();
-
-  try {
-    const response = await fetch("http://localhost:5000/api/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log("User created:", data);
-      // After signup, go to login so they get a token + user stored
-      navigate("/login");
-    } else {
-      console.log("Error:", data.message);
-      alert(data.message);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const response = await fetch(`${SERVER}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        navigate("/login");
+      } else {
+        setError(data.message || "Signup failed.");
+      }
+    } catch {
+      setError("Cannot reach server. Check your connection.");
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.log("Error:", error);
-    alert("Server error");
   }
-}
 
 
   return (
@@ -93,10 +81,17 @@ export default function Signup() {
 />
 
           <button
-            className="mt-4 bg-indigo-500 hover:bg-indigo-600 transition-all p-3 rounded-lg font-semibold"
+            disabled={loading}
+            className="mt-4 bg-indigo-500 hover:bg-indigo-600 transition-all p-3 rounded-lg font-semibold disabled:opacity-60"
           >
-            Create Account
+            {loading ? "Creating..." : "Create Account"}
           </button>
+
+          {error && (
+            <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
 
         </form>
 
