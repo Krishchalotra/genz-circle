@@ -14,8 +14,11 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CLIENT_URL || "*",
+  methods: ["GET", "POST", "DELETE"],
+}));
+app.use(express.json({ limit: "4mb" })); // cap payload size
 
 app.use("/api/groups", groupRoutes);
 app.use("/api/auth", authRoutes);
@@ -56,7 +59,13 @@ mongoose
   .catch((err) => console.error(err));
 
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+  cors: {
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+  },
+  maxHttpBufferSize: 4 * 1024 * 1024, // 4MB max socket message
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // { groupName: Map(socketId -> userName) }

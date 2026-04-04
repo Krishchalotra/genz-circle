@@ -9,7 +9,8 @@ export default function MainLayout() {
   const [groups, setGroups] = useState([]);
   const [unread, setUnread] = useState({});
   const [toast, setToast] = useState(null);
-  const [notifPrompt, setNotifPrompt] = useState(false); // custom permission dialog
+  const [notifPrompt, setNotifPrompt] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(socket.connected);
   const location = useLocation();
 
   useEffect(() => {
@@ -25,6 +26,15 @@ export default function MainLayout() {
         ]);
       });
     return () => { cancelled = true; };
+  }, []);
+
+  // Socket connection status
+  useEffect(() => {
+    const onConnect = () => setSocketConnected(true);
+    const onDisconnect = () => setSocketConnected(false);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    return () => { socket.off("connect", onConnect); socket.off("disconnect", onDisconnect); };
   }, []);
 
   // Join ALL groups on socket so we receive messages from every group
@@ -65,17 +75,21 @@ export default function MainLayout() {
         [data.group]: (prev[data.group] || 0) + 1,
       }));
 
-      // sound via Web Audio API (no file needed)
+      // sound — iOS Safari requires AudioContext to be resumed after user gesture
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.frequency.value = 520;
-        g.gain.setValueAtTime(0.3, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-        o.start(ctx.currentTime);
-        o.stop(ctx.currentTime + 0.3);
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          if (ctx.state === "suspended") ctx.resume();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 520;
+          g.gain.setValueAtTime(0.3, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          o.start(ctx.currentTime);
+          o.stop(ctx.currentTime + 0.3);
+        }
       } catch (_) {}
 
       // browser notification (background tab)
@@ -141,6 +155,13 @@ export default function MainLayout() {
       <div className="flex-1 flex flex-col text-white relative z-10">
         <Outlet />
       </div>
+
+      {/* RECONNECTING BANNER */}
+      {!socketConnected && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500/90 text-black text-xs font-semibold text-center py-1.5">
+          Reconnecting...
+        </div>
+      )}
 
       {/* IN-APP NOTIFICATION TOAST */}
       {toast && (

@@ -268,11 +268,11 @@ export default function Chat() {
             <div className={`flex items-end gap-2 ${msg.own ? "justify-end" : "justify-start"}`}>
               <MessageBubble message={msg.text} isOwn={msg.own}
                 fileData={msg.fileData} fileName={msg.fileName} fileType={msg.fileType} />
-              {/* Delete button — only for own messages */}
+              {/* Delete button — own messages, visible on hover (desktop) or always subtle (mobile) */}
               {msg.own && msg._id && (
                 <button
                   onClick={() => deleteMessage(msg)}
-                  className="opacity-0 group-hover:opacity-100 transition text-gray-600 hover:text-red-400 mb-1 shrink-0"
+                  className="opacity-0 group-hover:opacity-100 active:opacity-100 transition text-gray-600 hover:text-red-400 active:text-red-400 mb-1 shrink-0 touch-manipulation"
                   title="Delete message"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -313,7 +313,7 @@ export default function Chat() {
       )}
 
       {/* INPUT */}
-      <div className="p-4 border-t border-white/10 flex gap-3 bg-black/30 backdrop-blur-md items-center">
+      <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-white/10 flex gap-3 bg-black/30 backdrop-blur-md items-center">
 
         {/* Hidden file input */}
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFilePick} />
