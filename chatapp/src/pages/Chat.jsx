@@ -211,45 +211,47 @@ export default function Chat() {
 
   if (!group) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-400">
+      <div className="flex items-center justify-center h-full text-gray-400 bg-black/20 backdrop-blur-sm">
         Select a group to start chatting
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full w-full backdrop-blur-sm bg-black/20">
+    <div className="flex flex-col h-full w-full bg-black/20 backdrop-blur-sm">
 
       {/* HEADER */}
-      <div className="px-6 py-3 border-b border-white/10 bg-gradient-to-r from-indigo-900/60 to-purple-900/40 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="px-4 md:px-6 py-3 border-b border-white/10 bg-gradient-to-r from-indigo-900/60 to-purple-900/40 backdrop-blur-md flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_8px_2px_rgba(129,140,248,0.8)]"></div>
-          <span className="font-bold text-xl">{group.name}</span>
+          <span className="font-bold text-base md:text-xl">{group.name}</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2">
-            {onlineUsers.slice(0, 5).map((name, i) => (
-              <div key={i} title={name} className="w-7 h-7 rounded-full bg-indigo-600 border-2 border-white/20 flex items-center justify-center text-xs font-bold uppercase">
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex -space-x-2">
+            {onlineUsers.slice(0, 3).map((name, i) => (
+              <div key={i} title={name} className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white/20 flex items-center justify-center text-xs font-bold uppercase">
                 {name?.[0]}
               </div>
             ))}
           </div>
           <span className="text-xs text-green-400 font-medium flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>
-            {onlineUsers.length} online
+            <span className="hidden sm:inline">{onlineUsers.length} online</span>
+            <span className="sm:hidden">{onlineUsers.length}</span>
           </span>
           <button
             onClick={requestDelete}
-            className="ml-2 px-3 py-1 rounded-lg bg-red-600/30 hover:bg-red-600/60 border border-red-500/40 text-red-400 text-xs font-semibold transition"
+            className="px-2 md:px-3 py-1 rounded-lg bg-red-600/30 hover:bg-red-600/60 border border-red-500/40 text-red-400 text-xs font-semibold transition"
           >
-            Delete Group
+            <span className="hidden sm:inline">Delete Group</span>
+            <span className="sm:hidden">Delete</span>
           </button>
         </div>
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
+      <div className="flex-1 p-3 md:p-6 overflow-y-auto space-y-4">
 
         {/* EMPTY STATE */}
         {messages.length === 0 && (
@@ -313,7 +315,7 @@ export default function Chat() {
       )}
 
       {/* INPUT */}
-      <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-white/10 flex gap-3 bg-black/30 backdrop-blur-md items-center">
+      <div className="p-2 md:p-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] border-t border-white/10 flex gap-2 bg-black/30 backdrop-blur-md items-center">
 
         {/* Hidden file input */}
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFilePick} />
@@ -339,7 +341,7 @@ export default function Chat() {
         <button
           onClick={sendMessage}
           disabled={!input.trim() && !filePreview}
-          className="bg-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-500 transition font-semibold shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.8)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+          className="bg-indigo-600 px-4 md:px-6 py-3 rounded-xl hover:bg-indigo-500 transition font-semibold text-sm shadow-[0_0_15px_rgba(99,102,241,0.5)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none shrink-0"
         >
           Send
         </button>

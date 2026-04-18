@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import SERVER from "../config";
 
-export default function Sidebar({ groups, onGroupCreated, unread = {} }) {
+export default function Sidebar({ groups, onGroupCreated, unread = {}, onGroupSelect }) {
   const navigate = useNavigate();
   const [active, setActive] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -27,6 +27,7 @@ export default function Sidebar({ groups, onGroupCreated, unread = {} }) {
   function handleClick(group) {
     setActive(group._id);
     localStorage.setItem("currentGroup", JSON.stringify(group));
+    onGroupSelect && onGroupSelect();
     navigate("/app/chat");
   }
 
