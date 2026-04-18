@@ -58,7 +58,7 @@ export default function Sidebar({ groups, onGroupCreated, unread = {}, onGroupSe
 
   return (
     <>
-      <div className="w-64 bg-[#0d0d1a] border-r border-white/10 text-white flex flex-col relative z-10">
+      <div className="w-full h-full bg-[#0d0d1a] border-r border-white/10 text-white flex flex-col relative z-10">
 
         {/* TITLE */}
         <h2 className="text-2xl font-bold px-6 pt-6 pb-4 tracking-wide">Groups</h2>
