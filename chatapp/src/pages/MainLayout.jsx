@@ -11,33 +11,24 @@ export default function MainLayout() {
   const [unread, setUnread] = useState({});
   const [toast, setToast] = useState(null);
   const [notifPrompt, setNotifPrompt] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(socket.connected);
+  const [socketConnected, setSocketConnected] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  // open sidebar by default on desktop
+  // open sidebar on desktop by default
   useEffect(() => {
-    if (window.innerWidth >= 768) setSidebarOpen(true);
+    setSidebarOpen(window.innerWidth >= 768);
   }, []);
 
-  // on mobile, when a group is selected close sidebar
+  // close sidebar on mobile when navigating
   useEffect(() => {
     if (window.innerWidth < 768) setSidebarOpen(false);
-  }, [location]);
+  }, [location.pathname]);
 
   useEffect(() => {
-    let cancelled = false;
     axios.get(`${SERVER}/api/groups`)
-      .then((res) => { if (!cancelled) setGroups(res.data); })
-      .catch(() => {
-        if (!cancelled) setGroups([
-          { _id: "programming", name: "Programming" },
-          { _id: "gaming", name: "Gaming" },
-          { _id: "ai", name: "AI" },
-          { _id: "photography", name: "Photography" },
-        ]);
-      });
-    return () => { cancelled = true; };
+      .then((res) => setGroups(res.data))
+      .catch(() => setGroups([]));
   }, []);
 
   useEffect(() => {
@@ -55,8 +46,7 @@ export default function MainLayout() {
 
   useEffect(() => {
     if (!("Notification" in window)) return;
-    const asked = localStorage.getItem("notifAsked");
-    if (!asked) {
+    if (!localStorage.getItem("notifAsked")) {
       const t = setTimeout(() => setNotifPrompt(true), 1500);
       return () => clearTimeout(t);
     }
@@ -108,9 +98,7 @@ export default function MainLayout() {
   }, []);
 
   useEffect(() => {
-    socket.on("group_deleted", ({ group }) => {
-      setGroups((prev) => prev.filter((g) => g.name !== group));
-    });
+    socket.on("group_deleted", ({ group }) => setGroups((prev) => prev.filter((g) => g.name !== group)));
     return () => socket.off("group_deleted");
   }, []);
 
@@ -122,66 +110,56 @@ export default function MainLayout() {
   const isChatOpen = location.pathname.includes("/chat");
 
   return (
-    <div className="flex h-screen bg-cover bg-center relative overflow-hidden"
+    <div className="flex h-screen overflow-hidden bg-cover bg-center relative"
       style={{ backgroundImage: `url(${sky})` }}>
-      <div className="absolute inset-0 bg-black/60"></div>
+      <div className="absolute inset-0 bg-black/60 pointer-events-none" />
 
-      {/* MOBILE: overlay when sidebar open */}
+      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/50 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-20 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* SIDEBAR */}
-      <div className={`
-        fixed md:relative z-30 md:z-10 h-full inset-y-0 left-0
-        transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        w-full sm:w-80 md:w-64 shrink-0
-      `}>
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-30 md:relative md:z-10 md:translate-x-0
+        transition-transform duration-300 w-72 md:w-64 shrink-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <Sidebar
           groups={groups}
           unread={unread}
           onGroupCreated={(g) => setGroups((prev) => [...prev, g])}
-          onGroupSelect={() => setSidebarOpen(false)}
+          onGroupSelect={() => { if (window.innerWidth < 768) setSidebarOpen(false); }}
         />
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col text-white relative z-10 min-w-0">
-
-        {/* MOBILE TOP BAR — back button when in chat */}
-        {isChatOpen && (
-          <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#0d0d1a]/80 border-b border-white/10 shrink-0">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="text-white p-1.5 rounded-lg bg-white/10 active:bg-white/20"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <span className="text-sm font-semibold text-gray-300">
-              {JSON.parse(localStorage.getItem("currentGroup"))?.name || "Chat"}
-            </span>
-          </div>
-        )}
+      {/* Main */}
+      <div className="flex-1 flex flex-col text-white relative z-10 min-w-0 overflow-hidden">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#0d0d1a]/90 border-b border-white/10 shrink-0 relative z-10">
+          <button onClick={() => setSidebarOpen(true)}
+            className="text-white p-2 rounded-lg bg-white/10 active:bg-white/20 touch-manipulation">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="text-sm font-semibold text-white truncate">
+            {JSON.parse(localStorage.getItem("currentGroup"))?.name || "GenZ Circle"}
+          </span>
+        </div>
 
         <Outlet />
       </div>
 
-      {/* RECONNECTING BANNER */}
+      {/* Reconnecting */}
       {!socketConnected && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500/90 text-black text-xs font-semibold text-center py-1.5">
           Reconnecting...
         </div>
       )}
 
-      {/* IN-APP TOAST */}
+      {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 bg-[#1a1a2e] border border-indigo-500/40 rounded-2xl px-4 py-3 shadow-2xl flex items-start gap-3 max-w-xs w-[calc(100vw-2rem)] md:w-auto">
+        <div className="fixed top-4 right-4 z-50 bg-[#1a1a2e] border border-indigo-500/40 rounded-2xl px-4 py-3 shadow-2xl flex items-start gap-3 w-[calc(100vw-2rem)] max-w-xs">
           <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
             {toast.userName?.[0]?.toUpperCase()}
           </div>
@@ -190,11 +168,11 @@ export default function MainLayout() {
             <p className="text-xs text-white font-medium truncate">{toast.userName}</p>
             <p className="text-xs text-gray-400 truncate mt-0.5">{toast.text || "📎 sent an image"}</p>
           </div>
-          <button onClick={() => setToast(null)} className="text-gray-600 hover:text-white text-xs mt-0.5">✕</button>
+          <button onClick={() => setToast(null)} className="text-gray-500 hover:text-white text-xs">✕</button>
         </div>
       )}
 
-      {/* NOTIFICATION PERMISSION DIALOG */}
+      {/* Notification prompt */}
       {notifPrompt && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1a1a2e] border border-white/10 rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-4 w-[calc(100vw-2rem)] max-w-sm">
           <div className="text-2xl">🔔</div>
@@ -204,13 +182,9 @@ export default function MainLayout() {
           </div>
           <div className="flex gap-2 shrink-0">
             <button onClick={() => { setNotifPrompt(false); localStorage.setItem("notifAsked", "true"); Notification.requestPermission(); }}
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
-              Allow
-            </button>
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold">Allow</button>
             <button onClick={() => { setNotifPrompt(false); localStorage.setItem("notifAsked", "denied"); }}
-              className="px-3 py-1.5 rounded-lg border border-white/20 text-gray-300 text-xs transition">
-              No
-            </button>
+              className="px-3 py-1.5 rounded-lg border border-white/20 text-gray-300 text-xs">No</button>
           </div>
         </div>
       )}
