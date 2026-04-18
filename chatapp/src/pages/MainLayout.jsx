@@ -12,13 +12,17 @@ export default function MainLayout() {
   const [toast, setToast] = useState(null);
   const [notifPrompt, setNotifPrompt] = useState(false);
   const [socketConnected, setSocketConnected] = useState(socket.connected);
-  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  // open sidebar by default on desktop
+  useEffect(() => {
+    if (window.innerWidth >= 768) setSidebarOpen(true);
+  }, []);
 
   // on mobile, when a group is selected close sidebar
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) setSidebarOpen(false);
+    if (window.innerWidth < 768) setSidebarOpen(false);
   }, [location]);
 
   useEffect(() => {
